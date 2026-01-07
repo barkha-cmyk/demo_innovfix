@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Logs Viewer</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #667eea;
+        }
+        .controls {
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .stats {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .log-entry {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .log-header {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        .log-details {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .log-action {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #e3e8ff;
+            color: #667eea;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+        .no-logs {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <h1>📋 Activity Logs Viewer</h1>
+    
+    <div class="controls">
+        <button onclick="loadLogs()">🔄 Refresh Logs</button>
+        <button onclick="clearLogs()">🗑️ Clear All Logs</button>
+        <button onclick="exportLogs()">💾 Export as JSON</button>
+        <button onclick="window.location.href='standalone.html'">← Back to App</button>
+    </div>
+    
+    <div class="stats" id="stats"></div>
+    <div id="logs-container"></div>
+
+    <script>
+        function loadLogs() {
+            try {
+                const logs = JSON.parse(localStorage.getItem('activity-logs') || '[]');
+                const reversedLogs = [...logs].reverse(); // Most recent first
+                
+                // Update stats
+                const statsDiv = document.getElementById('stats');
+                const totalLogs = logs.length;
+                const navigationLogs = logs.filter(l => l.action === 'navigation').length;
+                const buttonLogs = logs.filter(l => l.action === 'button_click').length;
+                const errorLogs = logs.filter(l => l.action === 'error').length;
+                
+                statsDiv.innerHTML = `
+                    <strong>Statistics:</strong><br>
+                    Total Logs: ${totalLogs} | 
+                    Navigation: ${navigationLogs} | 
+                    Button Clicks: ${buttonLogs} | 
+                    Errors: ${errorLogs}
+                `;
+                
+                // Display logs
+                const container = document.getElementById('logs-container');
+                
+                if (reversedLogs.length === 0) {
+                    container.innerHTML = '<div class="no-logs">No activity logs found. Start using the app to generate logs!</div>';
+                    return;
+                }
+                
+                container.innerHTML = reversedLogs.map((log, index) => {
+                    const actionColor = {
+                        'navigation': '#667eea',
+                        'button_click': '#48bb78',
+                        'error': '#f56565'
+                    }[log.action] || '#999';
+                    
+                    return `
+                        <div class="log-entry" style="border-left-color: ${actionColor}">
+                            <div class="log-header">
+                                <span class="log-action" style="background: ${actionColor}20; color: ${actionColor}">
+                                    ${log.action}
+                                </span>
+                                ${log.date}
+                            </div>
+                            <div><strong>Section:</strong> ${log.section}</div>
+                            ${log.details && Object.keys(log.details).length > 0 ? `
+                                <div class="log-details">
+                                    <strong>Details:</strong><br>
+                                    ${Object.entries(log.details).map(([key, value]) => 
+                                        `<span style="margin-right: 15px;"><strong>${key}:</strong> ${JSON.stringify(value)}</span>`
+                                    ).join('')}
+                                </div>
+                            ` : ''}
+                            <div class="log-details">
+                                <strong>User Sign:</strong> ${log.userSign || 'N/A'} | 
+                                <strong>Language:</strong> ${log.language || 'N/A'}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                console.error('Error loading logs:', error);
+                document.getElementById('logs-container').innerHTML = 
+                    '<div class="no-logs" style="color: red;">Error loading logs: ' + error.message + '</div>';
+            }
+        }
+        
+        function clearLogs() {
+            if (confirm('Are you sure you want to clear all activity logs?')) {
+                localStorage.removeItem('activity-logs');
+                loadLogs();
+                alert('All logs cleared!');
+            }
+        }
+        
+        function exportLogs() {
+            try {
+                const logs = JSON.parse(localStorage.getItem('activity-logs') || '[]');
+                const dataStr = JSON.stringify(logs, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `activity-logs-${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                URL.revokeObjectURL(url);
+                alert('Logs exported successfully!');
+            } catch (error) {
+                alert('Error exporting logs: ' + error.message);
+            }
+        }
+        
+        // Load logs on page load
+        loadLogs();
+    </script>
+</body>
+</html>
+
