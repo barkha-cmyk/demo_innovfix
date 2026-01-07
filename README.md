@@ -1,2 +1,2 @@
 # demo_innovfix
-its a ai astrology
+ai astrology application
