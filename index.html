@@ -1,14 +1,1179 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Astrology - Your Personal AI Astrologer</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Astrology - Your Personal Astrologer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            font-size: 32px;
+            line-height: 1;
+            font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 16px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero p {
+            font-size: 20px;
+            margin-bottom: 32px;
+            opacity: 0.9;
+        }
+
+        /* Services Grid */
+        .services {
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            margin: 40px 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 36px;
+            text-align: center;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .service-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
+            user-select: none;
+            position: relative;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .service-card * {
+            pointer-events: none;
+        }
+        
+        .service-card:active {
+            transform: scale(0.98);
+        }
+        
+        /* Loading states */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Interactive elements */
+        input:focus, select:focus, textarea:focus {
+            border-color: #667eea !important;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        /* Success/Error messages */
+        .message-success {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 12px 0;
+        }
+        
+        .message-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 12px 0;
+        }
+        
+        /* Progress indicator */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+        
+        /* Card hover effects */
+        .horoscope-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.2);
+        }
+        
+        /* Smooth transitions */
+        * {
+            transition: background-color 0.2s, color 0.2s, transform 0.2s;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+
+        .service-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 64px;
+            font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Twemoji Mozilla', 'EmojiOne Color', 'Android Emoji', sans-serif;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .service-icon::before {
+            content: '';
+            display: inline-block;
+        }
+
+        .service-card h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .service-card p {
+            color: #666;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+
+        .premium-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        /* Chat Section */
+        .chat-section {
+            padding: 40px 20px;
+            display: none;
+        }
+
+        .chat-section.active,
+        .chat-section[style*="display: block"] {
+            display: block !important;
+        }
+
+        .chat-box {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            word-wrap: break-word;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message.bot .message-content {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .chat-input {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .chat-input input:focus {
+            border-color: #667eea;
+        }
+
+        .chat-input button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Sign Selector */
+        .sign-selector {
+            position: relative;
+        }
+
+        .sign-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 8px;
+            min-width: 220px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+
+        .sign-menu.show {
+            display: block;
+        }
+
+        .sign-option {
+            padding: 12px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sign-option:hover {
+            background: #f0f0f0;
+        }
+
+        .sign-option .symbol {
+            font-size: 24px;
+            font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+            line-height: 1;
+        }
+        
+        #sign-btn {
+            font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+        }
+
+        /* Horoscope Cards */
+        .horoscope-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .horoscope-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .horoscope-card h3 {
+            font-size: 24px;
+            margin-bottom: 16px;
+            color: #667eea;
+        }
+
+        .horoscope-card p {
+            color: #666;
+            line-height: 1.8;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 60px;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 32px;
+            }
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+            .nav-links {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo" id="app-logo">
+                    <span class="logo-icon">🌟</span>
+                    <span>AI Astrologer</span>
+                </div>
+                <div class="header-controls">
+                    <div class="sign-selector">
+                        <button class="btn btn-secondary" onclick="toggleSignMenu()" id="sign-btn">♈ Aries</button>
+                        <div class="sign-menu" id="sign-menu">
+                            <div class="sign-option" onclick="selectSign('Aries')"><span class="symbol">♈</span> Aries</div>
+                            <div class="sign-option" onclick="selectSign('Taurus')"><span class="symbol">♉</span> Taurus</div>
+                            <div class="sign-option" onclick="selectSign('Gemini')"><span class="symbol">♊</span> Gemini</div>
+                            <div class="sign-option" onclick="selectSign('Cancer')"><span class="symbol">♋</span> Cancer</div>
+                            <div class="sign-option" onclick="selectSign('Leo')"><span class="symbol">♌</span> Leo</div>
+                            <div class="sign-option" onclick="selectSign('Virgo')"><span class="symbol">♍</span> Virgo</div>
+                            <div class="sign-option" onclick="selectSign('Libra')"><span class="symbol">♎</span> Libra</div>
+                            <div class="sign-option" onclick="selectSign('Scorpio')"><span class="symbol">♏</span> Scorpio</div>
+                            <div class="sign-option" onclick="selectSign('Sagittarius')"><span class="symbol">♐</span> Sagittarius</div>
+                            <div class="sign-option" onclick="selectSign('Capricorn')"><span class="symbol">♑</span> Capricorn</div>
+                            <div class="sign-option" onclick="selectSign('Aquarius')"><span class="symbol">♒</span> Aquarius</div>
+                            <div class="sign-option" onclick="selectSign('Pisces')"><span class="symbol">♓</span> Pisces</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="toggleLanguage()" id="lang-btn">🇬🇧 English</button>
+                    <button class="btn btn-primary" data-action="chat" onclick="navigateTo('chat')">💬 Chat Now</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="#" data-section="home" onclick="navigateTo('home'); return false;" class="active" id="nav-home">Home</a></li>
+                <li><a href="#" data-section="horoscope" onclick="navigateTo('horoscope'); return false;" id="nav-horoscope">Horoscope</a></li>
+                <li><a href="#" data-section="kundli" onclick="navigateTo('kundli'); return false;" id="nav-kundli">Kundli</a></li>
+                <li><a href="#" data-section="matchmaking" onclick="navigateTo('matchmaking'); return false;" id="nav-matchmaking">Matchmaking</a></li>
+                <li><a href="#" data-section="tarot" onclick="navigateTo('tarot'); return false;" id="nav-tarot">Tarot</a></li>
+                <li><a href="#" data-section="numerology" onclick="navigateTo('numerology'); return false;" id="nav-numerology">Numerology</a></li>
+                <li><a href="#" data-section="panchang" onclick="navigateTo('panchang'); return false;" id="nav-panchang">Panchang</a></li>
+                <li><a href="#" data-section="gemstone" onclick="navigateTo('gemstone'); return false;" id="nav-gemstone">Gemstone</a></li>
+                <li><a href="#" data-section="vastu" onclick="navigateTo('vastu'); return false;" id="nav-vastu">Vastu</a></li>
+                <li><a href="#" data-section="history" onclick="navigateTo('history'); return false;" id="nav-history">History</a></li>
+                <li><a href="#" data-section="profile" onclick="navigateTo('profile'); return false;" id="nav-profile">Profile</a></li>
+                <li><a href="#" data-action="chat" onclick="navigateTo('chat'); return false;" id="nav-chat">Chat</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Home Section -->
+    <section id="home-section" class="section" style="display: block;">
+        <div class="hero">
+            <h1 id="hero-title">Welcome to AI Astrology</h1>
+            <p id="hero-subtitle">Your Personal AI Astrologer - Get Instant Astrological Guidance</p>
+            <button class="btn btn-primary" data-action="chat" onclick="navigateTo('chat')" style="font-size: 18px; padding: 14px 32px;">Start Free Chat</button>
+        </div>
+
+        <div class="services">
+            <h2 class="section-title" id="services-title">Our Services</h2>
+            <div class="services-grid">
+                <div class="service-card" data-section="horoscope" onclick="navigateTo('horoscope')">
+                    <div class="service-icon">📅</div>
+                    <h3 id="service-horoscope">Daily Horoscope</h3>
+                    <p id="service-horoscope-desc">Get your daily, weekly, and monthly horoscope predictions based on your zodiac sign.</p>
+                </div>
+                <div class="service-card" data-section="kundli" onclick="navigateTo('kundli')">
+                    <div class="service-icon">🔮</div>
+                    <h3 id="service-kundli">Kundli / Birth Chart</h3>
+                    <p id="service-kundli-desc">Generate your complete birth chart and understand your planetary positions.</p>
+                    <span class="premium-badge">Premium</span>
+                </div>
+                <div class="service-card" data-section="matchmaking" onclick="navigateTo('matchmaking')">
+                    <div class="service-icon">💑</div>
+                    <h3 id="service-matchmaking">Matchmaking</h3>
+                    <p id="service-matchmaking-desc">Check compatibility between two people based on their zodiac signs and birth details.</p>
+                    <span class="premium-badge">Premium</span>
+                </div>
+                <div class="service-card" data-section="tarot" onclick="navigateTo('tarot')">
+                    <div class="service-icon">🃏</div>
+                    <h3 id="service-tarot">Tarot Reading</h3>
+                    <p id="service-tarot-desc">Get insights into your future through AI-powered tarot card readings.</p>
+                    <span class="premium-badge">Premium</span>
+                </div>
+                <div class="service-card" data-section="numerology" onclick="navigateTo('numerology')">
+                    <div class="service-icon">🔢</div>
+                    <h3 id="service-numerology">Numerology</h3>
+                    <p id="service-numerology-desc">Discover your life path number and understand its significance.</p>
+                    <span class="premium-badge">Premium</span>
+                </div>
+                <div class="service-card" data-action="chat" onclick="navigateTo('chat')">
+                    <div class="service-icon">💬</div>
+                    <h3 id="service-chat">AI Astrologer Chat</h3>
+                    <p id="service-chat-desc">Chat with our AI astrologer for instant answers to all your astrology questions.</p>
+                </div>
+                <div class="service-card" data-section="panchang" onclick="navigateTo('panchang')">
+                    <div class="service-icon">📿</div>
+                    <h3 id="service-panchang">Panchang</h3>
+                    <p id="service-panchang-desc">Check today's Tithi, Nakshatra, Yoga, Karana, and auspicious timings.</p>
+                </div>
+                <div class="service-card" data-section="gemstone" onclick="navigateTo('gemstone')">
+                    <div class="service-icon">💎</div>
+                    <h3 id="service-gemstone">Gemstone Recommendations</h3>
+                    <p id="service-gemstone-desc">Discover the perfect gemstone based on your zodiac sign and planetary positions.</p>
+                    <span class="premium-badge">Premium</span>
+                </div>
+                <div class="service-card" data-section="vastu" onclick="navigateTo('vastu')">
+                    <div class="service-icon">🏠</div>
+                    <h3 id="service-vastu">Vastu Tips</h3>
+                    <p id="service-vastu-desc">Get Vastu Shastra recommendations for your home and office arrangement.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Horoscope Section -->
+    <section id="horoscope-section" class="section" style="display: none;">
+        <div class="services">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                <h2 class="section-title" id="horoscope-title" style="margin: 0;">Your Horoscope</h2>
+                <div style="display: flex; gap: 12px;">
+                    <button onclick="navigateTo('home')" class="btn btn-secondary" style="font-size: 14px;">🏠 Home</button>
+                    <button onclick="navigateTo('profile')" class="btn btn-secondary" style="font-size: 14px;">👤 Profile</button>
+                </div>
+            </div>
+            <div class="horoscope-cards">
+                <div class="horoscope-card">
+                    <h3 id="daily-title">Daily Horoscope</h3>
+                    <p id="daily-content">Loading...</p>
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e0e0e0;">
+                        <button onclick="navigateTo('chat')" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px; width: 100%;">💬 Ask About Today</button>
+                    </div>
+                </div>
+                <div class="horoscope-card">
+                    <h3 id="weekly-title">Weekly Horoscope</h3>
+                    <p id="weekly-content">Loading...</p>
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e0e0e0;">
+                        <button onclick="navigateTo('tarot')" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px; width: 100%;">🔮 Get Tarot Reading</button>
+                    </div>
+                </div>
+                <div class="horoscope-card">
+                    <h3 id="monthly-title">Monthly Horoscope</h3>
+                    <p id="monthly-content">Loading...</p>
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e0e0e0;">
+                        <button onclick="navigateTo('kundli')" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px; width: 100%;">🌟 View Birth Chart</button>
+                    </div>
+                </div>
+                <div class="horoscope-card">
+                    <h3 id="yearly-title">Yearly Horoscope</h3>
+                    <p id="yearly-content">Loading...</p>
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e0e0e0;">
+                        <button onclick="navigateTo('profile')" class="btn btn-secondary" style="font-size: 12px; padding: 6px 12px; width: 100%;">👤 Update Profile</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chat Section -->
+    <section id="chat-section" class="chat-section" style="display: none;">
+        <div class="container">
+            <div class="chat-box">
+                <div class="chat-header">
+                    <div>
+                        <h3 style="margin: 0;" id="chat-header-title">💬 Chat with AI Astrologer</h3>
+                        <p style="margin: 4px 0 0 0; opacity: 0.9; font-size: 14px;" id="chat-header-subtitle">Ask anything about astrology</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="hideChat()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">✕</button>
+                </div>
+                <div class="chat-messages" id="messages"></div>
+                <div style="padding: 12px; background: rgba(255,255,255,0.1); border-top: 1px solid rgba(255,255,255,0.2);">
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;" id="quick-questions">
+                        <button onclick="sendQuickQuestion('What is my daily horoscope?')" class="btn btn-secondary" style="font-size: 11px; padding: 6px 12px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">📅 Daily Horoscope</button>
+                        <button onclick="sendQuickQuestion('Tell me about my zodiac sign')" class="btn btn-secondary" style="font-size: 11px; padding: 6px 12px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">🔮 Zodiac Info</button>
+                        <button onclick="sendQuickQuestion('What is my lucky number today?')" class="btn btn-secondary" style="font-size: 11px; padding: 6px 12px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">🎯 Lucky Number</button>
+                        <button onclick="sendQuickQuestion('Career guidance')" class="btn btn-secondary" style="font-size: 11px; padding: 6px 12px; background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">💼 Career</button>
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="user-input" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+                    <button onclick="sendMessage()" id="send-btn">Send</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Birth Chart Section -->
+    <section id="kundli-section" class="section" style="display: none;">
+        <div class="services">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                <h2 class="section-title" style="margin: 0;">Kundli / Birth Chart</h2>
+                <div style="display: flex; gap: 12px;">
+                    <button onclick="navigateTo('home')" class="btn btn-secondary" style="font-size: 14px;">🏠 Home</button>
+                    <button onclick="navigateTo('matchmaking')" class="btn btn-secondary" style="font-size: 14px;">💑 Matchmaking</button>
+                    <button onclick="navigateTo('profile')" class="btn btn-secondary" style="font-size: 14px;">👤 Profile</button>
+                </div>
+            </div>
+            <div style="max-width: 800px; margin: 0 auto; padding: 40px;">
+                <div style="background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <h3 style="margin-bottom: 24px; color: #667eea;">Generate Your Birth Chart</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Birth Date:</label>
+                            <input type="date" id="kundli-date" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Birth Time:</label>
+                            <input type="time" id="kundli-time" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Birth Place:</label>
+                        <input type="text" id="kundli-place" placeholder="City, Country" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                    </div>
+                    <button onclick="generateKundli()" class="btn btn-primary" style="width: 100%; margin-bottom: 24px;">Generate Birth Chart</button>
+                    <div id="kundli-result" style="display: none; padding: 20px; background: #f8f9fa; border-radius: 12px;">
+                        <h4 style="margin-bottom: 16px; color: #667eea;">Your Birth Chart</h4>
+                        <div id="kundli-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Compatibility Section -->
+    <section id="matchmaking-section" class="section" style="display: none;">
+        <div class="services">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                <h2 class="section-title" style="margin: 0;">Matchmaking / Compatibility</h2>
+                <div style="display: flex; gap: 12px;">
+                    <button onclick="navigateTo('home')" class="btn btn-secondary" style="font-size: 14px;">🏠 Home</button>
+                    <button onclick="navigateTo('kundli')" class="btn btn-secondary" style="font-size: 14px;">🔮 Kundli</button>
+                </div>
+            </div>
+            <div style="max-width: 900px; margin: 0 auto; padding: 40px;">
+                <div style="background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <h3 style="margin-bottom: 24px; color: #667eea;">Check Compatibility</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+                        <div>
+                            <h4 style="margin-bottom: 16px; color: #667eea;">Person 1</h4>
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Zodiac Sign:</label>
+                                <select id="person1-sign" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                                    <option value="Aries">♈ Aries</option>
+                                    <option value="Taurus">♉ Taurus</option>
+                                    <option value="Gemini">♊ Gemini</option>
+                                    <option value="Cancer">♋ Cancer</option>
+                                    <option value="Leo">♌ Leo</option>
+                                    <option value="Virgo">♍ Virgo</option>
+                                    <option value="Libra">♎ Libra</option>
+                                    <option value="Scorpio">♏ Scorpio</option>
+                                    <option value="Sagittarius">♐ Sagittarius</option>
+                                    <option value="Capricorn">♑ Capricorn</option>
+                                    <option value="Aquarius">♒ Aquarius</option>
+                                    <option value="Pisces">♓ Pisces</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Birth Date:</label>
+                                <input type="date" id="person1-date" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                            </div>
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom: 16px; color: #667eea;">Person 2</h4>
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Zodiac Sign:</label>
+                                <select id="person2-sign" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                                    <option value="Aries">♈ Aries</option>
+                                    <option value="Taurus">♉ Taurus</option>
+                                    <option value="Gemini">♊ Gemini</option>
+                                    <option value="Cancer">♋ Cancer</option>
+                                    <option value="Leo">♌ Leo</option>
+                                    <option value="Virgo">♍ Virgo</option>
+                                    <option value="Libra">♎ Libra</option>
+                                    <option value="Scorpio">♏ Scorpio</option>
+                                    <option value="Sagittarius">♐ Sagittarius</option>
+                                    <option value="Capricorn">♑ Capricorn</option>
+                                    <option value="Aquarius">♒ Aquarius</option>
+                                    <option value="Pisces">♓ Pisces</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Birth Date:</label>
+                                <input type="date" id="person2-date" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="calculateCompatibility()" class="btn btn-primary" style="width: 100%; margin-bottom: 24px;">Check Compatibility</button>
+                    <div id="compatibility-result" style="display: none; padding: 20px; background: #f8f9fa; border-radius: 12px;">
+                        <h4 style="margin-bottom: 16px; color: #667eea;">Compatibility Report</h4>
+                        <div id="compatibility-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tarot Section -->
+    <section id="tarot-section" class="section" style="display: none;">
+        <div class="services">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                <h2 class="section-title" style="margin: 0;">Tarot Reading</h2>
+                <div style="display: flex; gap: 12px;">
+                    <button onclick="navigateTo('home')" class="btn btn-secondary" style="font-size: 14px;">🏠 Home</button>
+                    <button onclick="navigateTo('history')" class="btn btn-secondary" style="font-size: 14px;">📜 History</button>
+                </div>
+            </div>
+            <div style="max-width: 800px; margin: 0 auto; padding: 40px;">
+                <div style="background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <h3 style="margin-bottom: 24px; color: #667eea;">Three-Card Tarot Reading</h3>
+                    <p style="margin-bottom: 24px; color: #666;">Ask a question and draw three cards for Past, Present, and Future.</p>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Your Question:</label>
+                        <textarea id="tarot-question" placeholder="What do you want to know?" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; min-height: 80px; resize: vertical;"></textarea>
+                    </div>
+                    <button onclick="drawTarotCards()" class="btn btn-primary" style="width: 100%; margin-bottom: 24px;">Draw Cards</button>
+                    <div id="tarot-result" style="display: none;">
+                        <div id="tarot-cards" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;"></div>
+                        <div id="tarot-reading" style="padding: 20px; background: #f8f9fa; border-radius: 12px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="numerology-section" class="section" style="display: none;">
+        <div class="services">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                <h2 class="section-title" style="margin: 0;">Numerology</h2>
+                <div style="display: flex; gap: 12px;">
+                    <button onclick="navigateTo('home')" class="btn btn-secondary" style="font-size: 14px;">🏠 Home</button>
+                    <button onclick="navigateTo('profile')" class="btn btn-secondary" style="font-size: 14px;">👤 Profile</button>
+                </div>
+            </div>
+            <div style="max-width: 600px; margin: 0 auto; padding: 40px;">
+                <div style="background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <h3 style="margin-bottom: 24px; color: #667eea;">Calculate Your Life Path Number</h3>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Enter your birth date:</label>
+                        <input type="date" id="numerology-birthdate" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Enter your full name:</label>
+                        <input type="text" id="numerology-name" placeholder="e.g., John Smith" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                    </div>
+                    <button onclick="calculateNumerology()" class="btn btn-primary" style="width: 100%; margin-bottom: 24px;">Calculate</button>
+                    <div id="numerology-result" style="display: none; padding: 20px; background: #f8f9fa; border-radius: 12px;">
+                        <h4 style="margin-bottom: 16px; color: #667eea;">Your Numerology Report</h4>
+                        <div id="numerology-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- User Profile Section -->
+    <section id="profile-section" class="section" style="display: none;">
+        <div class="services">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                <h2 class="section-title" style="margin: 0;">User Profile</h2>
+                <div style="display: flex; gap: 12px;">
+                    <button onclick="navigateTo('home')" class="btn btn-secondary" style="font-size: 14px;">🏠 Home</button>
+                    <button onclick="navigateTo('kundli')" class="btn btn-secondary" style="font-size: 14px;">🔮 Kundli</button>
+                </div>
+            </div>
+            <div style="max-width: 800px; margin: 0 auto; padding: 40px;">
+                <div style="background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <h3 style="margin-bottom: 24px; color: #667eea;">Manage Your Profile</h3>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Name:</label>
+                        <input type="text" id="profile-name" placeholder="Your name" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Birth Date:</label>
+                        <input type="date" id="profile-birthdate" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Birth Time:</label>
+                        <input type="time" id="profile-birthtime" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Birth Place:</label>
+                        <input type="text" id="profile-birthplace" placeholder="City, Country" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;">Zodiac Sign:</label>
+                        <select id="profile-zodiac" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                            <option value="Aries">♈ Aries</option>
+                            <option value="Taurus">♉ Taurus</option>
+                            <option value="Gemini">♊ Gemini</option>
+                            <option value="Cancer">♋ Cancer</option>
+                            <option value="Leo">♌ Leo</option>
+                            <option value="Virgo">♍ Virgo</option>
+                            <option value="Libra">♎ Libra</option>
+                            <option value="Scorpio">♏ Scorpio</option>
+                            <option value="Sagittarius">♐ Sagittarius</option>
+                            <option value="Capricorn">♑ Capricorn</option>
+                            <option value="Aquarius">♒ Aquarius</option>
+                            <option value="Pisces">♓ Pisces</option>
+                        </select>
+                    </div>
+                    <button onclick="saveProfile()" class="btn btn-primary" style="width: 100%; margin-bottom: 16px;">Save Profile</button>
+                    <div id="profile-saved" style="display: none; padding: 12px; background: #d4edda; color: #155724; border-radius: 8px; margin-bottom: 16px;">Profile saved successfully!</div>
+                    <div id="profile-info" style="padding: 20px; background: #f8f9fa; border-radius: 12px; margin-top: 24px;">
+                        <h4 style="margin-bottom: 12px; color: #667eea;">Current Profile</h4>
+                        <div id="profile-display">No profile saved yet. Fill in the form above to create your profile.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Panchang Section -->
+    <section id="panchang-section" class="section" style="display: none;">
+        <div class="services">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                <h2 class="section-title" style="margin: 0;" id="panchang-title">Panchang</h2>
+                <div style="display: flex; gap: 12px;">
+                    <button onclick="navigateTo('home')" class="btn btn-secondary" style="font-size: 14px;">🏠 Home</button>
+                </div>
+            </div>
+            <div style="max-width: 1000px; margin: 0 auto; padding: 40px;">
+                <div style="background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <h3 style="margin-bottom: 24px; color: #667eea;" id="panchang-subtitle">Today's Panchang</h3>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;" id="panchang-date-label">Select Date:</label>
+                        <input type="date" id="panchang-date" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;" value="">
+                    </div>
+                    <button onclick="generatePanchang()" class="btn btn-primary" style="width: 100%; margin-bottom: 24px;" id="panchang-generate-btn">Get Panchang</button>
+                    <div id="panchang-result" style="display: none;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 24px;">
+                            <div style="padding: 20px; background: #f8f9fa; border-radius: 12px;">
+                                <div style="font-size: 14px; color: #666; margin-bottom: 8px;" id="panchang-tithi-label">Tithi</div>
+                                <div style="font-size: 24px; font-weight: 700; color: #667eea;" id="panchang-tithi-value">-</div>
+                            </div>
+                            <div style="padding: 20px; background: #f8f9fa; border-radius: 12px;">
+                                <div style="font-size: 14px; color: #666; margin-bottom: 8px;" id="panchang-nakshatra-label">Nakshatra</div>
+                                <div style="font-size: 24px; font-weight: 700; color: #667eea;" id="panchang-nakshatra-value">-</div>
+                            </div>
+                            <div style="padding: 20px; background: #f8f9fa; border-radius: 12px;">
+                                <div style="font-size: 14px; color: #666; margin-bottom: 8px;" id="panchang-yoga-label">Yoga</div>
+                                <div style="font-size: 24px; font-weight: 700; color: #667eea;" id="panchang-yoga-value">-</div>
+                            </div>
+                            <div style="padding: 20px; background: #f8f9fa; border-radius: 12px;">
+                                <div style="font-size: 14px; color: #666; margin-bottom: 8px;" id="panchang-karana-label">Karana</div>
+                                <div style="font-size: 24px; font-weight: 700; color: #667eea;" id="panchang-karana-value">-</div>
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 24px;">
+                            <div style="padding: 20px; background: #f8f9fa; border-radius: 12px;">
+                                <div style="font-size: 14px; color: #666; margin-bottom: 8px;" id="panchang-sunrise-label">Sunrise</div>
+                                <div style="font-size: 20px; font-weight: 600; color: #667eea;" id="panchang-sunrise-value">-</div>
+                            </div>
+                            <div style="padding: 20px; background: #f8f9fa; border-radius: 12px;">
+                                <div style="font-size: 14px; color: #666; margin-bottom: 8px;" id="panchang-sunset-label">Sunset</div>
+                                <div style="font-size: 20px; font-weight: 600; color: #667eea;" id="panchang-sunset-value">-</div>
+                            </div>
+                        </div>
+                        <div id="panchang-muhurat" style="padding: 20px; background: #e8f5e9; border-radius: 12px; margin-top: 24px;">
+                            <h4 style="margin-bottom: 16px; color: #667eea;" id="panchang-muhurat-title">Auspicious Timings (Muhurat)</h4>
+                            <div id="panchang-muhurat-content"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gemstone Section -->
+    <section id="gemstone-section" class="section" style="display: none;">
+        <div class="services">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                <h2 class="section-title" style="margin: 0;" id="gemstone-title">Gemstone Recommendations</h2>
+                <div style="display: flex; gap: 12px;">
+                    <button onclick="navigateTo('home')" class="btn btn-secondary" style="font-size: 14px;">🏠 Home</button>
+                    <button onclick="navigateTo('kundli')" class="btn btn-secondary" style="font-size: 14px;">🔮 Kundli</button>
+                </div>
+            </div>
+            <div style="max-width: 900px; margin: 0 auto; padding: 40px;">
+                <div style="background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <h3 style="margin-bottom: 24px; color: #667eea;" id="gemstone-subtitle">Find Your Perfect Gemstone</h3>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;" id="gemstone-sign-label">Zodiac Sign:</label>
+                        <select id="gemstone-sign" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                            <option value="Aries">♈ Aries</option>
+                            <option value="Taurus">♉ Taurus</option>
+                            <option value="Gemini">♊ Gemini</option>
+                            <option value="Cancer">♋ Cancer</option>
+                            <option value="Leo">♌ Leo</option>
+                            <option value="Virgo">♍ Virgo</option>
+                            <option value="Libra">♎ Libra</option>
+                            <option value="Scorpio">♏ Scorpio</option>
+                            <option value="Sagittarius">♐ Sagittarius</option>
+                            <option value="Capricorn">♑ Capricorn</option>
+                            <option value="Aquarius">♒ Aquarius</option>
+                            <option value="Pisces">♓ Pisces</option>
+                        </select>
+                    </div>
+                    <button onclick="getGemstoneRecommendation()" class="btn btn-primary" style="width: 100%; margin-bottom: 24px;" id="gemstone-get-btn">Get Recommendation</button>
+                    <div id="gemstone-result" style="display: none;">
+                        <div id="gemstone-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vastu Section -->
+    <section id="vastu-section" class="section" style="display: none;">
+        <div class="services">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                <h2 class="section-title" style="margin: 0;" id="vastu-title">Vastu Shastra Tips</h2>
+                <div style="display: flex; gap: 12px;">
+                    <button onclick="navigateTo('home')" class="btn btn-secondary" style="font-size: 14px;">🏠 Home</button>
+                </div>
+            </div>
+            <div style="max-width: 1000px; margin: 0 auto; padding: 40px;">
+                <div style="background: white; border-radius: 16px; padding: 32px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <h3 style="margin-bottom: 24px; color: #667eea;" id="vastu-subtitle">Vastu Tips for Your Space</h3>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600;" id="vastu-type-label">Select Area:</label>
+                        <select id="vastu-type" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                            <option value="home">🏠 Home</option>
+                            <option value="office">🏢 Office</option>
+                            <option value="bedroom">🛏️ Bedroom</option>
+                            <option value="kitchen">🍳 Kitchen</option>
+                            <option value="living">🛋️ Living Room</option>
+                            <option value="puja">🕉️ Puja Room</option>
+                        </select>
+                    </div>
+                    <button onclick="getVastuTips()" class="btn btn-primary" style="width: 100%; margin-bottom: 24px;" id="vastu-get-btn">Get Vastu Tips</button>
+                    <div id="vastu-result" style="display: none;">
+                        <div id="vastu-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reading History Section -->
+    <section id="history-section" class="section" style="display: none;">
+        <div class="services">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                <h2 class="section-title" style="margin: 0;">Reading History</h2>
+                <div style="display: flex; gap: 12px;">
+                    <button onclick="navigateTo('home')" class="btn btn-secondary" style="font-size: 14px;">🏠 Home</button>
+                </div>
+            </div>
+            <div style="max-width: 1000px; margin: 0 auto;">
+                <div style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
+                    <button onclick="filterHistory('all')" class="btn btn-secondary" id="filter-all">All</button>
+                    <button onclick="filterHistory('chat')" class="btn btn-secondary" id="filter-chat">Chat</button>
+                    <button onclick="filterHistory('horoscope')" class="btn btn-secondary" id="filter-horoscope">Horoscope</button>
+                    <button onclick="filterHistory('kundli')" class="btn btn-secondary" id="filter-kundli">Kundli</button>
+                    <button onclick="filterHistory('compatibility')" class="btn btn-secondary" id="filter-compatibility">Compatibility</button>
+                    <button onclick="filterHistory('tarot')" class="btn btn-secondary" id="filter-tarot">Tarot</button>
+                    <button onclick="filterHistory('numerology')" class="btn btn-secondary" id="filter-numerology">Numerology</button>
+                    <button onclick="clearHistory()" class="btn btn-secondary" style="margin-left: auto;">Clear All</button>
+                </div>
+                <div id="history-list" style="display: grid; gap: 16px;">
+                    <!-- History items will be inserted here -->
+                </div>
+                <div id="history-empty" style="text-align: center; padding: 60px; color: #666; display: none;">
+                    <p style="font-size: 18px;">No reading history yet. Start chatting or generate readings to see them here!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 AI Astrologer. All rights reserved.</p>
+            <p style="margin-top: 8px; opacity: 0.8;">Your trusted companion for astrological guidance</p>
+        </div>
+    </footer>
+
+
+    <script>
+        // NEW IMPLEMENTATION - Event-based navigation system
+        (function() {
+            'use strict';
+
+            // App state
+            const appState = {
+                currentPage: 'home',
+                language: localStorage.getItem('ai-astrologer-language') || 'en',
+                zodiacSign: localStorage.getItem('ai-astrologer-sign') || 'Aries',
+                chatMessages: [],
+                readingHistory: JSON.parse(localStorage.getItem('reading-history') || '[]')
+            };
+
+            // Page navigation handler
+            function switchPage(pageName) {
+                if (!pageName) return;
+                appState.currentPage = pageName;
+                
+                // Hide all pages
+                document.querySelectorAll('.section, .chat-section').forEach(el => {
+                    el.style.display = 'none';
+                    el.classList.remove('active');
+                });
+                
+                // Show target page
+                const targetEl = document.getElementById(pageName + '-section');
+                if (targetEl) {
+                    targetEl.style.display = pageName === 'chat' ? 'flex' : 'block';
+                    targetEl.classList.add('active');
+                }
+                
+                // Update nav links
+                document.querySelectorAll('.nav-links a').forEach(link => {
+                    link.classList.remove('active');
+                });
+                const navLink = document.getElementById('nav-' + pageName);
+                if (navLink) navLink.classList.add('active');
+                
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            // Make navigateTo globally available
+            window.navigateTo = switchPage;
+
+            // Event delegation for navigation
+            document.addEventListener('DOMContentLoaded', function() {
+                // Handle nav links
+                document.querySelectorAll('[data-section], [data-action]').forEach(el => {
+                    el.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const section = this.getAttribute('data-section') || this.getAttribute('data-action');
+                        if (section) switchPage(section);
+                    });
+                });
+
+                // Handle onclick attributes
+                document.querySelectorAll('[onclick*="navigateTo"]').forEach(el => {
+                    const onclickAttr = el.getAttribute('onclick');
+                    if (onclickAttr) {
+                        el.removeAttribute('onclick');
+                        el.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const match = onclickAttr.match(/navigateTo\('([^']+)'\)/);
+                            if (match && match[1]) switchPage(match[1]);
+                        });
+                    }
+                });
+            });
+
+            // Stub functions for compatibility
+            window.toggleLanguage = function() { appState.language = appState.language === 'en' ? 'hi' : 'en'; localStorage.setItem('ai-astrologer-language', appState.language); location.reload(); };
+            window.toggleSignMenu = function() { document.getElementById('sign-menu')?.classList.toggle('show'); };
+            window.selectSign = function(sign) { appState.zodiacSign = sign; localStorage.setItem('ai-astrologer-sign', sign); document.getElementById('sign-btn').textContent = sign; };
+            window.showChat = function() { switchPage('chat'); };
+            window.hideChat = function() { switchPage('home'); };
+            window.sendMessage = function() { console.log('Chat feature - to be implemented'); };
+            window.sendQuickQuestion = function(q) { console.log('Quick question:', q); };
+            window.handleKeyPress = function(e) { if (e.key === 'Enter') window.sendMessage(); };
+            window.generateKundli = function() { console.log('Kundli generation - to be implemented'); };
+            window.calculateCompatibility = function() { console.log('Compatibility - to be implemented'); };
+            window.calculateNumerology = function() { console.log('Numerology - to be implemented'); };
+            window.drawTarotCards = function() { console.log('Tarot - to be implemented'); };
+            window.generatePanchang = function() { console.log('Panchang - to be implemented'); };
+            window.getGemstoneRecommendation = function() { console.log('Gemstone - to be implemented'); };
+            window.getVastuTips = function() { console.log('Vastu - to be implemented'); };
+            window.saveProfile = function() { console.log('Profile save - to be implemented'); };
+            window.loadProfile = function() { console.log('Profile load - to be implemented'); };
+            window.displayHistory = function() { console.log('History - to be implemented'); };
+            window.filterHistory = function(type) { console.log('Filter history:', type); };
+            window.clearHistory = function() { console.log('Clear history'); };
+            window.saveToHistory = function(type, data) { console.log('Save to history:', type, data); };
+            window.deleteReading = function(id) { console.log('Delete reading:', id); };
+            window.updateHoroscope = function() { console.log('Update horoscope'); };
+            window.updateUI = function() { console.log('Update UI'); };
+            window.updateQuickInsights = function() { console.log('Update insights'); };
+            window.exportKundli = function() { console.log('Export kundli'); };
+            window.printKundli = function() { window.print(); };
+        })();
+    </script>
+</body>
+</html>
